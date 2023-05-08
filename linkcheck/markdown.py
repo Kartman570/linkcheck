@@ -20,3 +20,15 @@ def reference_links(text):
         label = (match.group(2) or match.group(1)).strip().lower()
         found.append((match.start(), definitions.get(label, "missing-reference:" + label)))
     return found
+
+
+def anchors(text):
+    result = set()
+    counts = {}
+    for match in re.finditer(r"(?m)^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$", content(text)):
+        title = re.sub(r"[^\w\- ]", "", match.group(1).lower()).replace(" ", "-")
+        number = counts.get(title, 0)
+        counts[title] = number + 1
+        result.add(title if number == 0 else title + "-" + str(number))
+    result.update(re.findall(r'''(?:id|name)=["']([^"']+)["']''', text))
+    return result
